@@ -1,4 +1,18 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
+const friend = new Schema({
+    friendId: {
+        type: Schema.Types.ObjectId,
+        default: () => new Types.ObjectId(),
+    },
+    username: {
+        type: String,
+        required: true,
+    },
+    befriendedAt: {
+        type: Date,
+        default: true,
+    }
+});
 const userSchema = new Schema({
     username: {
         type: String,
@@ -17,15 +31,18 @@ const userSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Thought',
         }],
-    friends: [{
-            type: Schema.Types.ObjectId,
-            ref: 'Friend',
-        }]
+    friends: [friend]
 }, {
     toJSON: {
         virtuals: true,
         getters: true,
-    }
+    },
+    timestamps: true
+});
+userSchema
+    .virtual('friendCount')
+    .get(function () {
+    return this.friends.length;
 });
 const User = model('User', userSchema);
 export default User;

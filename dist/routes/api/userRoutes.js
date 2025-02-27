@@ -1,19 +1,12 @@
 import { Router } from 'express';
+import { getAllUsers, getUser, createUser, updateUser, deleteUser, addFriend, destroyFriend } from '../../controllers/userController.js';
 const router = Router();
-import { getAllUsers,
-// getUserById,
-// createUser,
-// deleteUser,
-// addAssignment,
-// removeAssignment,
- } from '../../controllers/userController.js';
 // /api/Users
-router.route('/').get(getAllUsers);
-// .post(createUser);
-// // /api/Users/:UserId
-// router.route('/:UserId').get(getUserById).delete(deleteUser);
-// // /api/Users/:UserId/assignments
-// router.route('/:UserId/assignments').post(addAssignment);
-// // /api/Users/:UserId/assignments/:assignmentId
-// router.route('/:UserId/assignments/:assignmentId').delete(removeAssignment);
+router.route('/').get(getAllUsers).post(createUser);
+// /api/Users/:UserId
+router.route('/:UserId').get(getUser).put(updateUser).delete(deleteUser);
+// /api/Users/:UserId/friends
+router.route('/:UserId/friends').post(addFriend);
+// /api/Users/:UserId/friends/:friendId
+router.route('/:UserId/friends/:friendId').delete(destroyFriend);
 export { router as userRouter };
