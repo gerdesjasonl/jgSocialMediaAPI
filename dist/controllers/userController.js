@@ -113,7 +113,10 @@ export const addFriend = async (req, res) => {
 export const destroyFriend = async (req, res) => {
     try {
         const userId = req.params.UserId;
-        const friendId = new mongoose.Types.ObjectId(req.params.friendId); // Convert to ObjectId
+        const friendId = req.params.friendId;
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+            return res.status(400).json({ message: 'Invalid user or friend ID' });
+        }
         const user = await User.findByIdAndUpdate(userId, { $pull: { friends: friendId } }, // Remove friend by ObjectId
         { new: true });
         if (!user) {
