@@ -1,4 +1,5 @@
 import { Thought, User } from "../models/index.js";
+import mongoose from "mongoose";
 // Get all thoughts
 export const getAllThoughts = async (_req, res) => {
     try {
@@ -14,7 +15,7 @@ export const getAllThoughts = async (_req, res) => {
 // Get a thought by _id
 export const getThought = async (req, res) => {
     try {
-        const thought = await Thought.findOne({ _id: req.params._id })
+        const thought = await Thought.findOne({ _id: req.params.thoughtId })
             .select('-__v');
         if (!thought) {
             return;
@@ -32,7 +33,7 @@ export const getThought = async (req, res) => {
 export const createThought = async (req, res) => {
     try {
         const dbThoughtData = await Thought.create(req.body);
-        const updatedUser = await User.findByIdAndUpdate(req.params._id, { $addToSet: { thoughts: dbThoughtData._id } }, { new: true, runValidators: true });
+        const updatedUser = await User.findByIdAndUpdate(req.params.userId, { $addToSet: { thoughts: dbThoughtData._id } }, { new: true, runValidators: true }).populate('thoughts');
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -43,10 +44,10 @@ export const createThought = async (req, res) => {
     }
     return;
 };
-// PUT to update a thought by _id
+// PUT to update a thought text
 export const updateThought = async (req, res) => {
     try {
-        const thought = await Thought.findByIdAndUpdate(req.params.id, { $set: { thoughtText: req.body.thoughtText } }, { runValidators: true, new: true });
+        const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, { $set: { thoughtText: req.body.thoughtText } }, { runValidators: true, new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }
@@ -59,7 +60,7 @@ export const updateThought = async (req, res) => {
 // DELETE to remove a thought by _id
 export const deleteThought = async (req, res) => {
     try {
-        const thought = await Thought.findOneAndDelete({ _id: req.params._id });
+        const thought = await Thought.findOneAndDelete({ _id: req.params.thoughtId });
         if (!thought) {
             return res.status(404).json({ message: 'No thought exists' });
         }
@@ -73,7 +74,8 @@ export const deleteThought = async (req, res) => {
 // POST to create a reaction and store it in a thought's reactions array
 export const addReaction = async (req, res) => {
     try {
-        const thought = await Thought.findByIdAndUpdate(req.params.id, { $addToSet: { reactions: req.body } }, { runValidators: true, new: true });
+        const reaction = new mongoose.Types.ObjectId(req.params.reactionId);
+        const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, { $addToSet: { reactions: reaction.id } }, { runValidators: true, new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }
@@ -87,7 +89,7 @@ export const addReaction = async (req, res) => {
 export const destroyReaction = async (req, res) => {
     console.log(req.body);
     try {
-        const thought = await Thought.findByIdAndUpdate(req.params.id, { $pull: { reactions: { _id: req.body.reactionId } } }, { new: true });
+        const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, { $pull: { reactions: { _id: req.body.reactionId } } }, { new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }

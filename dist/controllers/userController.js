@@ -83,7 +83,7 @@ export const addFriend = async (req, res) => {
         if (!friend) {
             return res.status(404).json({ message: 'Friend not found' });
         }
-        const user = await User.findByIdAndUpdate(userId, { $addToSet: { friends: { _id: friend._id } } }, { runValidators: true, new: true }).populate('friends');
+        const user = await User.findByIdAndUpdate(userId, { $addToSet: { friends: { _id: friend.id } } }, { runValidators: true, new: true }).populate('friends');
         if (!user) {
             return res.status(404).json({ message: 'No user found with that Id' });
         }

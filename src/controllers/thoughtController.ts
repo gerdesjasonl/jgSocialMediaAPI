@@ -18,7 +18,7 @@ export const getAllThoughts = async (_req: Request, res: Response) => {
 // Get a thought by _id
 export const getThought = async (req:Request, res: Response) => {
     try {
-        const thought = await Thought.findOne({_id: req.params._id})
+        const thought = await Thought.findOne({_id: req.params.thoughtId})
         .select('-__v');
 
         if (!thought) {
@@ -36,8 +36,8 @@ export const createThought = async(req:Request, res:Response) => {
     try {
         const dbThoughtData = await Thought.create(req.body);
         const updatedUser = await User.findByIdAndUpdate(
-            req.params._id, 
-            { $addToSet: { thoughts: dbThoughtData._id } }, 
+            req.params.UserId, 
+            { $addToSet: { thoughts: dbThoughtData.id } }, 
             { new: true, runValidators: true }
         ).populate('thoughts');
 
@@ -55,7 +55,7 @@ export const createThought = async(req:Request, res:Response) => {
 export const updateThought = async (req: Request, res: Response) => {
     try {
         const thought = await Thought.findByIdAndUpdate(
-            req.params._id,
+            req.params.thoughtId,
             { $set: {thoughtText: req.body.thoughtText } },
             { runValidators: true, new: true }
         );
@@ -72,7 +72,7 @@ export const updateThought = async (req: Request, res: Response) => {
 // DELETE to remove a thought by _id
 export const deleteThought = async (req: Request, res: Response) => {
     try {
-        const thought = await Thought.findOneAndDelete({_id: req.params._id});
+        const thought = await Thought.findOneAndDelete({_id: req.params.thoughtId});
 
         if (!thought) {
             return res.status(404).json({message: 'No thought exists'});
@@ -89,7 +89,7 @@ export const addReaction = async (req: Request, res: Response) => {
     try {
         const reaction = new mongoose.Types.ObjectId(req.params.reactionId);
         const thought = await Thought.findByIdAndUpdate(
-            req.params._id,
+            req.params.thoughtId,
             { $addToSet: {reactions: reaction.id } },
             { runValidators: true, new: true }
         );
@@ -107,7 +107,7 @@ export const destroyReaction = async (req: Request, res: Response) => {
     console.log (req.body);
     try {
         const thought = await Thought.findByIdAndUpdate(
-            req.params._id,
+            req.params.thoughtId,
             { $pull: {reactions: { _id: req.body.reactionId } } },
             {new: true}
         );

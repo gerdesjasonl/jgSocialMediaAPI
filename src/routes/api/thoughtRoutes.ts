@@ -4,15 +4,17 @@ import { getAllThoughts, getThought, createThought, updateThought, deleteThought
 const router = Router();
 
 // /api/thoughts
-router.route('/').get(getAllThoughts).post(createThought);
+router.route('/').get(getAllThoughts);
+
+router.route('/Users/:UserId').post(createThought);
 
 // /api/thoughts/:thoughtId
-router.route('/:_id').get(getThought).put(updateThought).delete(deleteThought);
+router.route('/:thoughtId').get(getThought).put(updateThought).delete(deleteThought);
 
 // /api/thoughts/:thoughtId/reactions
-router.route('/:_id/reactions').post(addReaction);
+router.route('/:thoughtId/reactions').post(addReaction);
 
 // /api/thoughts/:thoughtId/reactions/:reactionId
-router.route('/:_id/reactions/:reactionId').delete(destroyReaction);
+router.route('/:thoughtId/reactions/:reactionId').delete(destroyReaction);
 
 export { router as thoughtRouter };
