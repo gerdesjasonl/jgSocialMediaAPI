@@ -33,7 +33,7 @@ export const getThought = async (req, res) => {
 export const createThought = async (req, res) => {
     try {
         const dbThoughtData = await Thought.create(req.body);
-        const updatedUser = await User.findByIdAndUpdate(req.params.userId, { $addToSet: { thoughts: dbThoughtData._id } }, { new: true, runValidators: true }).populate('thoughts');
+        const updatedUser = await User.findByIdAndUpdate(req.params.UserId, { $addToSet: { thoughts: dbThoughtData } }, { new: true, runValidators: true }).populate('thoughts');
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
         }

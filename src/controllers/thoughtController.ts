@@ -18,7 +18,7 @@ export const getAllThoughts = async (_req: Request, res: Response) => {
 // Get a thought by _id
 export const getThought = async (req:Request, res: Response) => {
     try {
-        const thought = await Thought.findOne({_id: req.params.thoughtId})
+        const thought = await Thought.findOne({ _id: req.params.thoughtId })
         .select('-__v');
 
         if (!thought) {
@@ -37,7 +37,7 @@ export const createThought = async(req:Request, res:Response) => {
         const dbThoughtData = await Thought.create(req.body);
         const updatedUser = await User.findByIdAndUpdate(
             req.params.UserId, 
-            { $addToSet: { thoughts: dbThoughtData.id } }, 
+            { $addToSet: { thoughts: dbThoughtData } }, 
             { new: true, runValidators: true }
         ).populate('thoughts');
 

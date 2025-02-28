@@ -16,7 +16,7 @@ export const getAllUsers = async (_req, res) => {
 // GET a user by user _id
 export const getUser = async (req, res) => {
     try {
-        const user = await User.findOne({ _id: req.params._id })
+        const user = await User.findOne({ _id: req.params.UserId })
             .select('-__v');
         if (!user) {
             return;
@@ -43,8 +43,8 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
     console.log('Currently Updating User');
     try {
-        const user = await User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(req.params._id) }, { $set: { username: req.body.username } }, { runValidators: true, new: true });
-        console.log(req.params._id);
+        const user = await User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(req.params.UserId) }, { $set: { username: req.body.username } }, { runValidators: true, new: true });
+        console.log(req.params.UserId);
         if (!user) {
             return res.status(404).json({ message: 'No user found with that Id' });
         }
@@ -57,7 +57,7 @@ export const updateUser = async (req, res) => {
 // DELETE to remove user by _id
 export const deleteUser = async (req, res) => {
     try {
-        const user = await User.findOneAndDelete({ _id: req.params._id });
+        const user = await User.findOneAndDelete({ _id: req.params.UserId });
         if (!user) {
             return res.status(404).json({ message: 'No such user exists' });
         }
@@ -111,7 +111,7 @@ export const addFriend = async (req, res) => {
 // }
 export const destroyFriend = async (req, res) => {
     try {
-        const userId = req.params._id;
+        const userId = req.params.UserId;
         const friendId = new mongoose.Types.ObjectId(req.params.friendId); // Convert to ObjectId
         const user = await User.findByIdAndUpdate(userId, { $pull: { friends: friendId } }, // Remove friend by ObjectId
         { new: true });
