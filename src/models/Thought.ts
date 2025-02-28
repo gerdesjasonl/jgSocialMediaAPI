@@ -4,10 +4,17 @@ interface IThought extends Document {
     thoughtText: string,
     createdAt: Date,
     username: string,
-    reactions: [typeof reaction],
+    reactions: IReaction[],
 }
 
-const reaction = new Schema({
+interface IReaction {
+    reactionId: Types.ObjectId;
+    reactionBody: string;
+    username: string;
+    createdAt: Date;
+}
+
+const reactionSchema = new Schema<IReaction>({
     reactionId: {
         type: Schema.Types.ObjectId,
         default: () => new Types.ObjectId(),
@@ -26,7 +33,7 @@ const reaction = new Schema({
 
     createdAt: {
         type: Date,
-        default: true,
+        default: Date.now,
     }
 },
 {
@@ -56,7 +63,7 @@ const thoughtSchema = new Schema<IThought>(
             required: true,
         },
         
-        reactions: [reaction],
+        reactions: [reactionSchema],
     },
     {
         toJSON: {

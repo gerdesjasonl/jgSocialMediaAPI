@@ -4,9 +4,9 @@ const router = Router();
 // /api/users
 router.route('/').get(getAllUsers).post(createUser);
 // /api/users/:userId
-router.route('/:Userid').get(getUser).put(updateUser).delete(deleteUser);
+router.route('/:UserId').get(getUser).put(updateUser).delete(deleteUser);
 // /api/users/:userId/friends
-router.route('/:Userid/friends').post(addFriend);
+router.route('/:UserId/friends').post(addFriend);
 // /api/Users/:userId/friends/:friendId
-router.route('/:Userid/friends/:friendId').delete(destroyFriend);
+router.route('/:UserId/friends/:friendId').delete(destroyFriend);
 export { router as userRouter };

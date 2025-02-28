@@ -64,6 +64,7 @@ export const deleteThought = async (req, res) => {
         if (!thought) {
             return res.status(404).json({ message: 'No thought exists' });
         }
+        await User.findOneAndUpdate({ thoughts: req.params.thoughtId }, { $pull: { thoughts: req.params.thoughtId } });
         return res.json({ message: 'Thought successfully deleted' });
     }
     catch (err) {
@@ -74,8 +75,17 @@ export const deleteThought = async (req, res) => {
 // POST to create a reaction and store it in a thought's reactions array
 export const addReaction = async (req, res) => {
     try {
-        const reaction = new mongoose.Types.ObjectId(req.params.reactionId);
-        const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, { $addToSet: { reactions: reaction.id } }, { runValidators: true, new: true });
+        const { reactionBody, username } = req.body;
+        if (!reactionBody || !username) {
+            return res.status(400).json({ message: "reactionBody and username are required." });
+        }
+        const reaction = {
+            reactionId: new mongoose.Types.ObjectId(),
+            reactionBody,
+            username,
+            createdAt: new Date(),
+        };
+        const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, { $addToSet: { reactions: reaction } }, { runValidators: true, new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }
@@ -87,9 +97,8 @@ export const addReaction = async (req, res) => {
 };
 // This finds and deletes a reaction by reactionId from Thought reactions array
 export const destroyReaction = async (req, res) => {
-    console.log(req.body);
     try {
-        const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, { $pull: { reactions: { _id: req.body.reactionId } } }, { new: true });
+        const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, { $pull: { reactions: { reactionId: req.params.reactionId } } }, { new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }

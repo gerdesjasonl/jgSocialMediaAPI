@@ -77,6 +77,10 @@ export const deleteThought = async (req: Request, res: Response) => {
         if (!thought) {
             return res.status(404).json({message: 'No thought exists'});
         }
+        await User.findOneAndUpdate(
+            { thoughts: req.params.thoughtId },
+            { $pull: { thoughts: req.params.thoughtId } }
+        );
         return res.json({ message: 'Thought successfully deleted' });
     } catch (err) {
         console.log(err);
@@ -87,10 +91,22 @@ export const deleteThought = async (req: Request, res: Response) => {
 // POST to create a reaction and store it in a thought's reactions array
 export const addReaction = async (req: Request, res: Response) => {
     try {
-        const reaction = new mongoose.Types.ObjectId(req.params.reactionId);
+        const { reactionBody, username } = req.body;
+
+        if (!reactionBody || !username) {
+            return res.status(400).json({ message: "reactionBody and username are required." });
+        }
+
+        const reaction = {
+            reactionId: new mongoose.Types.ObjectId(),
+            reactionBody,
+            username,
+            createdAt: new Date(),
+        };
+
         const thought = await Thought.findByIdAndUpdate(
             req.params.thoughtId,
-            { $addToSet: {reactions: reaction.id } },
+            { $addToSet: { reactions: reaction } },
             { runValidators: true, new: true }
         );
         if (!thought) {
@@ -104,11 +120,10 @@ export const addReaction = async (req: Request, res: Response) => {
 
 // This finds and deletes a reaction by reactionId from Thought reactions array
 export const destroyReaction = async (req: Request, res: Response) => {
-    console.log (req.body);
     try {
         const thought = await Thought.findByIdAndUpdate(
             req.params.thoughtId,
-            { $pull: {reactions: { _id: req.body.reactionId } } },
+            { $pull: {reactions: { reactionId: req.params.reactionId } } },
             {new: true}
         );
         if (!thought) {

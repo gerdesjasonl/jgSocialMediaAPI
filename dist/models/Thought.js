@@ -1,5 +1,5 @@
 import { Schema, model, Types } from 'mongoose';
-const reaction = new Schema({
+const reactionSchema = new Schema({
     reactionId: {
         type: Schema.Types.ObjectId,
         default: () => new Types.ObjectId(),
@@ -15,7 +15,7 @@ const reaction = new Schema({
     },
     createdAt: {
         type: Date,
-        default: true,
+        default: Date.now,
     }
 }, {
     toJSON: {
@@ -37,7 +37,7 @@ const thoughtSchema = new Schema({
         type: String,
         required: true,
     },
-    reactions: [reaction],
+    reactions: [reactionSchema],
 }, {
     toJSON: {
         virtuals: true,

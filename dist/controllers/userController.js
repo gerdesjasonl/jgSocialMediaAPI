@@ -63,7 +63,7 @@ export const deleteUser = async (req, res) => {
         }
         // This will search for any associated thoughts and delete them.
         const thoughts = await Thought.deleteMany({ userId: user._id });
-        if (!thoughts) {
+        if (thoughts.deletedCount === 0) {
             return res.status(404).json({
                 message: 'User deleted, but no thoughts found',
             });
