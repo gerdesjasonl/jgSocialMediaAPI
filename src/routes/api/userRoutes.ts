@@ -10,7 +10,7 @@ router.route('/').get(getAllUsers).post(createUser);
 router.route('/:_id').get(getUser).put(updateUser).delete(deleteUser);
 
 // /api/users/:userId/friends
-router.route('/:_id/friends').put(addFriend);
+router.route('/:_id/friends').post(addFriend);
 
 // /api/Users/:userId/friends/:friendId
 router.route('/:_id/friends/:friendId').delete(destroyFriend);

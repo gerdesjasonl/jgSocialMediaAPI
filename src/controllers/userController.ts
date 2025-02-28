@@ -1,5 +1,6 @@
 import { User, Thought } from "../models/index.js";
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 
 
 // GET all users
@@ -41,13 +42,13 @@ export const createUser = async(req: Request, res: Response) => {
 // PUT update to user by _id
 export const updateUser = async (req: Request, res: Response) => {
     console.log('Currently Updating User');
-    console.log (req.body);
     try {
         const user = await User.findOneAndUpdate(
-            { _id: req.params._id },
-            { $addToSet: { username: req.body.username } },
-            { runValidators: true, new: true }
-        );
+            { _id: new mongoose.Types.ObjectId(req.params._id) },
+            { $set: { username: req.body.username } },
+                { runValidators: true, new: true }
+            );
+            console.log(req.params._id);
         if (!user) {
             return res.status(404).json({message: 'No user found with that Id'});
         }
@@ -66,7 +67,7 @@ export const deleteUser = async (req: Request, res: Response) => {
             return res.status(404).json({message: 'No such user exists'});
         }
         // This will search for any associated thoughts and delete them.
-        const thoughts = await Thought.deleteMany({ _id: req.params._id });
+        const thoughts = await Thought.deleteMany({ userId: user._id });
 
         if (!thoughts) {
             return res.status(404).json({
@@ -82,15 +83,18 @@ export const deleteUser = async (req: Request, res: Response) => {
 }
 // This adds a friend by friendId to the User friends array
 export const addFriend = async (req: Request, res: Response) => {
-    console.log (req.body);
-    const friendId = req.body._id;
-    const userId = req.params._id;
     try {
+        const userId = req.params._id;
+        const friend = new mongoose.Types.ObjectId(req.params.friendId); 
+        if (!friend) {
+            return res.status(404).json({ message: 'Friend not found' });
+        }
         const user = await User.findByIdAndUpdate(
             userId,
-            { $addToSet: {friends: friendId } },
+            { $addToSet: { friends: { _id: friend.id} } },
             { runValidators: true, new: true }
-        );
+        ).populate('friends');
+        
         if (!user) {
             return res.status(404).json({message: 'No user found with that Id'});
         }
@@ -99,20 +103,42 @@ export const addFriend = async (req: Request, res: Response) => {
         return res.status(500).json(err);
     }
 }
+
 // This finds and deletes Friend by friendId from user friends array
+// export const destroyFriend = async (req: Request, res: Response) => {
+//     try {
+//         const user = await User.findByIdAndUpdate(
+//             req.params._id,
+//             { $pull: {friends: req.params._id } },
+//             {new: true}
+//         );
+//         if (!user) {
+//             return res.status(404).json({message: 'No user found with that Id'});
+//         }
+//         return res.json(user);
+//     } catch (err) {
+//         return res.status(500).json(err);
+//     }
+// }
+
 export const destroyFriend = async (req: Request, res: Response) => {
-    console.log (req.body);
     try {
-        const user = await User.findOneAndUpdate(
-            { _id: req.params._id },
-            { $pull: {friends: req.body._id } },
-            {new: true}
+        const userId = req.params._id;
+        const friendId = new mongoose.Types.ObjectId(req.params.friendId); // Convert to ObjectId
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $pull: { friends: friendId } }, // Remove friend by ObjectId
+            { new: true }
         );
+
         if (!user) {
-            return res.status(404).json({message: 'No user found with that Id'});
+            return res.status(404).json({ message: 'No user found with that ID' });
         }
+
         return res.json(user);
     } catch (err) {
-        return res.status(500).json(err);
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-}
+};

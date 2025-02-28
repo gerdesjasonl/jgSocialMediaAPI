@@ -1,26 +1,26 @@
-import { Schema, model, Types, type Document} from 'mongoose';
+import { Schema, model, type Document} from 'mongoose';
+import mongoose from 'mongoose';
 
 interface IUser extends Document {
     username: string,
     email: string,
     thoughts: Schema.Types.ObjectId[],
-    friends: [typeof friend],
+    friends: Schema.Types.ObjectId[],
 }
 
-const friend = new Schema({
-    friendId: {
-        type: Schema.Types.ObjectId,
-        default: () => new Types.ObjectId(),
-    },
-    username: {
-        type: String,
-        required: true,
-    },
-    befriendedAt: {
-        type: Date,
-        default: true,
-    }
-});
+// const friend = new Schema({
+//     friendId: {
+//         type: Schema.Types.ObjectId,
+//         default: () => new Types.ObjectId(),
+//     },
+//     username: {
+//         type: String,
+//         required: true,
+//     },
+//     befriendedAt: {
+//         type: Date,
+//     }
+// });
 
 
 const userSchema = new Schema<IUser>({
@@ -44,7 +44,13 @@ const userSchema = new Schema<IUser>({
         ref: 'Thought',
     }],
 
-    friends: [friend]
+    friends: [
+        {
+            _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            username: { type: String, required: true },
+            befriendedAt: { type: Date },
+        }
+    ]
     },
     {
     toJSON: {

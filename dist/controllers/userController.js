@@ -1,4 +1,5 @@
 import { User, Thought } from "../models/index.js";
+import mongoose from "mongoose";
 // GET all users
 export const getAllUsers = async (_req, res) => {
     try {
@@ -41,9 +42,9 @@ export const createUser = async (req, res) => {
 // PUT update to user by _id
 export const updateUser = async (req, res) => {
     console.log('Currently Updating User');
-    console.log(req.body);
     try {
-        const user = await User.findOneAndUpdate({ _id: req.params._id }, { $addToSet: { username: req.body.username } }, { runValidators: true, new: true });
+        const user = await User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(req.params._id) }, { $set: { username: req.body.username } }, { runValidators: true, new: true });
+        console.log(req.params._id);
         if (!user) {
             return res.status(404).json({ message: 'No user found with that Id' });
         }
@@ -61,7 +62,7 @@ export const deleteUser = async (req, res) => {
             return res.status(404).json({ message: 'No such user exists' });
         }
         // This will search for any associated thoughts and delete them.
-        const thoughts = await Thought.deleteMany({ _id: req.params._id });
+        const thoughts = await Thought.deleteMany({ userId: user._id });
         if (!thoughts) {
             return res.status(404).json({
                 message: 'User deleted, but no thoughts found',
@@ -76,11 +77,13 @@ export const deleteUser = async (req, res) => {
 };
 // This adds a friend by friendId to the User friends array
 export const addFriend = async (req, res) => {
-    console.log(req.body);
-    const friendId = req.body._id;
-    const userId = req.params._id;
     try {
-        const user = await User.findByIdAndUpdate(userId, { $addToSet: { friends: friendId } }, { runValidators: true, new: true });
+        const userId = req.params._id;
+        const friend = new mongoose.Types.ObjectId(req.params.friendId);
+        if (!friend) {
+            return res.status(404).json({ message: 'Friend not found' });
+        }
+        const user = await User.findByIdAndUpdate(userId, { $addToSet: { friends: { _id: friend._id } } }, { runValidators: true, new: true }).populate('friends');
         if (!user) {
             return res.status(404).json({ message: 'No user found with that Id' });
         }
@@ -91,16 +94,34 @@ export const addFriend = async (req, res) => {
     }
 };
 // This finds and deletes Friend by friendId from user friends array
+// export const destroyFriend = async (req: Request, res: Response) => {
+//     try {
+//         const user = await User.findByIdAndUpdate(
+//             req.params._id,
+//             { $pull: {friends: req.params._id } },
+//             {new: true}
+//         );
+//         if (!user) {
+//             return res.status(404).json({message: 'No user found with that Id'});
+//         }
+//         return res.json(user);
+//     } catch (err) {
+//         return res.status(500).json(err);
+//     }
+// }
 export const destroyFriend = async (req, res) => {
-    console.log(req.body);
     try {
-        const user = await User.findOneAndUpdate({ _id: req.params._id }, { $pull: { friends: req.body._id } }, { new: true });
+        const userId = req.params._id;
+        const friendId = new mongoose.Types.ObjectId(req.params.friendId); // Convert to ObjectId
+        const user = await User.findByIdAndUpdate(userId, { $pull: { friends: friendId } }, // Remove friend by ObjectId
+        { new: true });
         if (!user) {
-            return res.status(404).json({ message: 'No user found with that Id' });
+            return res.status(404).json({ message: 'No user found with that ID' });
         }
         return res.json(user);
     }
     catch (err) {
-        return res.status(500).json(err);
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };

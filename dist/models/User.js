@@ -1,18 +1,18 @@
-import { Schema, model, Types } from 'mongoose';
-const friend = new Schema({
-    friendId: {
-        type: Schema.Types.ObjectId,
-        default: () => new Types.ObjectId(),
-    },
-    username: {
-        type: String,
-        required: true,
-    },
-    befriendedAt: {
-        type: Date,
-        default: true,
-    }
-});
+import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
+// const friend = new Schema({
+//     friendId: {
+//         type: Schema.Types.ObjectId,
+//         default: () => new Types.ObjectId(),
+//     },
+//     username: {
+//         type: String,
+//         required: true,
+//     },
+//     befriendedAt: {
+//         type: Date,
+//     }
+// });
 const userSchema = new Schema({
     username: {
         type: String,
@@ -31,7 +31,13 @@ const userSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Thought',
         }],
-    friends: [friend]
+    friends: [
+        {
+            _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            username: { type: String, required: true },
+            befriendedAt: { type: Date },
+        }
+    ]
 }, {
     toJSON: {
         virtuals: true,
