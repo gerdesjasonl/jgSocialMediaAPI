@@ -75,15 +75,16 @@ export const deleteUser = async (req, res) => {
         return res.status(500).json(err);
     }
 };
-// This adds a friend by friendId to the User friends array
+// This adds a friend by userId to the User friends array
 export const addFriend = async (req, res) => {
+    console.log('error');
     try {
-        const userId = req.params._id;
+        const userId = req.params.UserId;
         const friend = new mongoose.Types.ObjectId(req.params.friendId);
         if (!friend) {
             return res.status(404).json({ message: 'Friend not found' });
         }
-        const user = await User.findByIdAndUpdate(userId, { $addToSet: { friends: { _id: friend.id } } }, { runValidators: true, new: true }).populate('friends');
+        const user = await User.findByIdAndUpdate({ _id: userId }, { $addToSet: { friends: friend } }, { runValidators: true, new: true }).populate('friends');
         if (!user) {
             return res.status(404).json({ message: 'No user found with that Id' });
         }

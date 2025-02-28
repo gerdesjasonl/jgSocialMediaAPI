@@ -81,29 +81,32 @@ export const deleteUser = async (req: Request, res: Response) => {
         return res.status(500).json(err);
     }
 }
-// This adds a friend by friendId to the User friends array
+// This adds a friend by userId to the User friends array
 export const addFriend = async (req: Request, res: Response) => {
-    try {
-        const userId = req.params._id;
-        const friend = new mongoose.Types.ObjectId(req.params.friendId); 
-        if (!friend) {
-            return res.status(404).json({ message: 'Friend not found' });
-        }
-        const user = await User.findByIdAndUpdate(
-            userId,
-            { $addToSet: { friends: { _id: friend.id} } },
-            { runValidators: true, new: true }
-        ).populate('friends');
-        
-        if (!user) {
-            return res.status(404).json({message: 'No user found with that Id'});
-        }
-        return res.json(user);
-    } catch (err) {
-        return res.status(500).json(err);
+    console.log('error')
+try {
+    const userId = req.params.UserId;
+    const friend = new mongoose.Types.ObjectId(req.params.friendId); 
+    if (!friend) {
+        return res.status(404).json({ message: 'Friend not found' });
     }
+    const user = await User.findByIdAndUpdate(
+        {_id: userId},
+        { $addToSet: { friends: friend } },
+        { runValidators: true, new: true }
+    ).populate('friends');
+    
+    if (!user) {
+        return res.status(404).json({message: 'No user found with that Id'});
+    }
+    return res.json(user);
+} catch (err) {
+    return res.status(500).json(err);
+}
 }
 
+
+    
 // This finds and deletes Friend by friendId from user friends array
 // export const destroyFriend = async (req: Request, res: Response) => {
 //     try {
