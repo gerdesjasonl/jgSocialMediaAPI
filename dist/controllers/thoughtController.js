@@ -14,7 +14,7 @@ export const getAllThoughts = async (_req, res) => {
 // Get a thought by _id
 export const getThought = async (req, res) => {
     try {
-        const thought = await Thought.findOne({ _id: req.params.thoughtId })
+        const thought = await Thought.findOne({ _id: req.params._id })
             .select('-__v');
         if (!thought) {
             return;
@@ -48,7 +48,7 @@ export const updateThought = async (req, res) => {
     console.log('Currently Updating Thought');
     console.log(req.body);
     try {
-        const thought = await Thought.findOneAndUpdate({ _id: req.params.thoughtId }, { $addToSet: { thoughts: req.body } }, { runValidators: true, new: true });
+        const thought = await Thought.findOneAndUpdate({ _id: req.params._id }, { $addToSet: { thoughts: req.body } }, { runValidators: true, new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }
@@ -61,7 +61,7 @@ export const updateThought = async (req, res) => {
 // DELETE to remove a thought by _id
 export const deleteThought = async (req, res) => {
     try {
-        const thought = await Thought.findOneAndDelete({ _id: req.params.thoughtId });
+        const thought = await Thought.findOneAndDelete({ _id: req.params._id });
         if (!thought) {
             return res.status(404).json({ message: 'No thought exists' });
         }
@@ -76,7 +76,7 @@ export const deleteThought = async (req, res) => {
 export const addReaction = async (req, res) => {
     console.log(req.body);
     try {
-        const thought = await Thought.findOneAndUpdate({ _id: req.params.userId }, { $addToSet: { reactions: req.body.reactionId } }, { runValidators: true, new: true });
+        const thought = await Thought.findOneAndUpdate({ _id: req.params._id }, { $addToSet: { reactions: req.body._id } }, { runValidators: true, new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }
@@ -90,7 +90,7 @@ export const addReaction = async (req, res) => {
 export const destroyReaction = async (req, res) => {
     console.log(req.body);
     try {
-        const thought = await Thought.findOneAndUpdate({ _id: req.params.thoughtId }, { $pull: { reactions: req.body.reactionId } }, { new: true });
+        const thought = await Thought.findOneAndUpdate({ _id: req.params._id }, { $pull: { reactions: req.body._id } }, { new: true });
         if (!thought) {
             return res.status(404).json({ message: 'No thought found with that Id' });
         }

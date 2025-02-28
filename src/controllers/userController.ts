@@ -17,7 +17,7 @@ export const getAllUsers = async (_req: Request, res: Response) => {
 // GET a user by user _id
 export const getUser = async (req: Request, res: Response) => {
     try {
-        const user = await User.findOne({_id: req.params.userId})
+        const user = await User.findOne({_id: req.params._id})
             .select('-__v');
         
         if (!user) {
@@ -44,8 +44,8 @@ export const updateUser = async (req: Request, res: Response) => {
     console.log (req.body);
     try {
         const user = await User.findOneAndUpdate(
-            { _id: req.params.userId },
-            { $addToSet: {thoughts: req.body } },
+            { _id: req.params._id },
+            { $addToSet: { username: req.body.username } },
             { runValidators: true, new: true }
         );
         if (!user) {
@@ -60,13 +60,13 @@ export const updateUser = async (req: Request, res: Response) => {
 // DELETE to remove user by _id
 export const deleteUser = async (req: Request, res: Response) => {
     try {
-        const user = await User.findOneAndDelete({_id: req.params.userId});
+        const user = await User.findOneAndDelete({_id: req.params._id});
 
         if (!user) {
             return res.status(404).json({message: 'No such user exists'});
         }
         // This will search for any associated thoughts and delete them.
-        const thoughts = await Thought.deleteMany({ userId: req.params.userId });
+        const thoughts = await Thought.deleteMany({ _id: req.params._id });
 
         if (!thoughts) {
             return res.status(404).json({
@@ -83,10 +83,12 @@ export const deleteUser = async (req: Request, res: Response) => {
 // This adds a friend by friendId to the User friends array
 export const addFriend = async (req: Request, res: Response) => {
     console.log (req.body);
+    const friendId = req.body._id;
+    const userId = req.params._id;
     try {
-        const user = await User.findOneAndUpdate(
-            { _id: req.params.userId },
-            { $addToSet: {friends: req.body.friendId } },
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $addToSet: {friends: friendId } },
             { runValidators: true, new: true }
         );
         if (!user) {
@@ -102,8 +104,8 @@ export const destroyFriend = async (req: Request, res: Response) => {
     console.log (req.body);
     try {
         const user = await User.findOneAndUpdate(
-            { _id: req.params.userId },
-            { $pull: {friends: req.body.friendId } },
+            { _id: req.params._id },
+            { $pull: {friends: req.body._id } },
             {new: true}
         );
         if (!user) {

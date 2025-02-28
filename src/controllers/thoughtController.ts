@@ -17,7 +17,7 @@ export const getAllThoughts = async (_req: Request, res: Response) => {
 // Get a thought by _id
 export const getThought = async (req:Request, res: Response) => {
     try {
-        const thought = await Thought.findOne({_id: req.params.thoughtId})
+        const thought = await Thought.findOne({_id: req.params._id})
         .select('-__v');
 
         if (!thought) {
@@ -56,7 +56,7 @@ export const updateThought = async (req: Request, res: Response) => {
     console.log (req.body);
     try {
         const thought = await Thought.findOneAndUpdate(
-            { _id: req.params.thoughtId },
+            { _id: req.params._id },
             { $addToSet: {thoughts: req.body } },
             { runValidators: true, new: true }
         );
@@ -73,7 +73,7 @@ export const updateThought = async (req: Request, res: Response) => {
 // DELETE to remove a thought by _id
 export const deleteThought = async (req: Request, res: Response) => {
     try {
-        const thought = await Thought.findOneAndDelete({_id: req.params.thoughtId});
+        const thought = await Thought.findOneAndDelete({_id: req.params._id});
 
         if (!thought) {
             return res.status(404).json({message: 'No thought exists'});
@@ -90,8 +90,8 @@ export const addReaction = async (req: Request, res: Response) => {
     console.log (req.body);
     try {
         const thought = await Thought.findOneAndUpdate(
-            { _id: req.params.userId },
-            { $addToSet: {reactions: req.body.reactionId } },
+            { _id: req.params._id },
+            { $addToSet: {reactions: req.body._id } },
             { runValidators: true, new: true }
         );
         if (!thought) {
@@ -108,8 +108,8 @@ export const destroyReaction = async (req: Request, res: Response) => {
     console.log (req.body);
     try {
         const thought = await Thought.findOneAndUpdate(
-            { _id: req.params.thoughtId },
-            { $pull: {reactions: req.body.reactionId } },
+            { _id: req.params._id },
+            { $pull: {reactions: req.body._id } },
             {new: true}
         );
         if (!thought) {
