@@ -6,7 +6,7 @@ const router = Router();
 // /api/thoughts
 router.route('/').get(getAllThoughts);
 
-router.route('/:UserId/thoughts').put(createThought);
+router.route('/:UserId/thoughts').post(createThought);
 
 // /api/thoughts/:thoughtId
 router.route('/:thoughtId').get(getThought).put(updateThought).delete(deleteThought);
